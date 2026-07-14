@@ -7,7 +7,8 @@ export const RULES_FROM_ASSESSMENT = {
   maximumDrawPileExhaustions: 3,
   leaderboardLimit: 5,
 } as const;
-
+// the previous values are based on the assessment of the game rules in the project description, but they can be changed to any other values as long as they are consistent with the game rules.
+//the next values are based on the assessment of the game rules in the project description, but they can be changed to any other values as long as they are consistent with the game rules.
 export const GAME_ASSUMPTIONS = {
   handSize: 4,
 
@@ -16,7 +17,7 @@ export const GAME_ASSUMPTIONS = {
     incorrectPrediction: 0,
   },
 
-  tieOutcome: "loss",
+  tieOutcome: "loss", //if the player and the dealer have the same hand value, the player loses the round you can change this to "win" or "draw" if you want to change the game rules.
   honorValueScope: "tile-instance",
   useAdjustedValueAsNextBaseline: true,
   thirdExhaustionTiming: "after-round",
@@ -28,4 +29,4 @@ export const GAME_ASSUMPTIONS = {
     dragons: ["red", "green", "white"],
     copiesPerTile: 4,
   },
-} as const;
+} as const; //as const يعني ان القيم الموجودة في الكائن لا يمكن تغييرها بعد تعريفها ودقيقة
