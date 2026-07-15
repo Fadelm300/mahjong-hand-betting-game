@@ -4,6 +4,10 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { PredictionDirection } from "../engine/resolve-prediction";
+import {
+  rankLeaderboard,
+  type LeaderboardEntry,
+} from "../leaderboard/rank-leaderboard";
 import type { GameState } from "../state/game-state";
 import { playRound } from "../state/play-round";
 import { startNewGame } from "../state/start-new-game";
@@ -16,7 +20,11 @@ interface GameActions {
   readonly resetGame: () => void;
 }
 
-type GameStore = GameState & GameActions;
+interface LeaderboardState {
+  readonly leaderboard: readonly LeaderboardEntry[];
+}
+
+type GameStore = GameState & GameActions & LeaderboardState;
 
 const initialGameState: GameState = {
   status: "idle",
@@ -37,6 +45,7 @@ export const useGameStore = create<GameStore>()(
     (set) => ({
       ...initialGameState,
       hasHydrated: false,
+      leaderboard: [],
 
       setHasHydrated: (value) => {
         set({ hasHydrated: value });
@@ -47,7 +56,32 @@ export const useGameStore = create<GameStore>()(
       },
 
       makePrediction: (direction) => {
-        set((state) => playRound(state, direction));
+        set((state) => {
+          const nextState = playRound(state, direction);
+
+          const didGameEnd =
+            state.status !== "game-over" &&
+            nextState.status === "game-over";
+
+          if (!didGameEnd) {
+            return nextState;
+          }
+
+          const newEntry: LeaderboardEntry = {
+            id: crypto.randomUUID(),
+            score: nextState.score,
+            rounds: nextState.round,
+            completedAt: new Date().toISOString(),
+          };
+
+          return {
+            ...nextState,
+            leaderboard: rankLeaderboard(
+              state.leaderboard,
+              newEntry,
+            ),
+          };
+        });
       },
 
       resetGame: () => {
@@ -61,7 +95,6 @@ export const useGameStore = create<GameStore>()(
     },
   ),
 );
-
 
 // اللوجك:
 

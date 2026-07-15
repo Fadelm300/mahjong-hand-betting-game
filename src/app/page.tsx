@@ -13,6 +13,9 @@ export default function HomePage() {
   const score = useGameStore((state) => state.score);
   const round = useGameStore((state) => state.round);
   const startGame = useGameStore((state) => state.startGame);
+  const leaderboard = useGameStore(
+    (state) => state.leaderboard,
+  );
 
   const canContinue =
     status === "awaiting-prediction" ||
@@ -72,6 +75,25 @@ export default function HomePage() {
             <h2 className="font-semibold">Last completed game</h2>
             <p className="mt-2">Final score: {score}</p>
             <p>Final round: {round}</p>
+          </section>
+        )}
+
+        {hasHydrated && (
+          <section className="mt-8 border p-4">
+            <h2 className="text-xl font-semibold">Top scores</h2>
+
+            {leaderboard.length === 0 ? (
+              <p className="mt-3">No completed scores yet.</p>
+            ) : (
+              <ol className="mt-3 space-y-2">
+                {leaderboard.map((entry, index) => (
+                  <li key={entry.id}>
+                    {index + 1}. Score: {entry.score} — Rounds:{" "}
+                    {entry.rounds}
+                  </li>
+                ))}
+              </ol>
+            )}
           </section>
         )}
       </section>
