@@ -2,21 +2,11 @@
 
 import { useRouter } from "next/navigation";
 
+import { GameStats } from "@/features/game/components/game-stats";
+import { HandDisplay } from "@/features/game/components/hand-display";
+import { HistoryPanel } from "@/features/game/components/history-panel";
 import { useGameHydration } from "@/features/game/hooks/use-game-hydration";
 import { useGameStore } from "@/features/game/store/game-store";
-import type { Tile } from "@/features/game/types/game";
-
-function getTileLabel(tile: Tile): string {
-  if (tile.category === "number") {
-    return `${tile.rank} ${tile.suit}`;
-  }
-
-  if (tile.category === "wind") {
-    return `${tile.kind} wind`;
-  }
-
-  return `${tile.kind} dragon`;
-}
 
 export default function GamePage() {
   const router = useRouter();
@@ -54,9 +44,11 @@ export default function GamePage() {
   const lastRound = history[history.length - 1];
   const canPredict = status === "awaiting-prediction";
 
+  const goHome = () => router.push("/");
+
   if (!hasHydrated) {
     return (
-      <main className="mx-auto max-w-4xl px-6 py-16">
+      <main className="mx-auto max-w-5xl px-6 py-16">
         <p>Loading saved game...</p>
       </main>
     );
@@ -64,7 +56,7 @@ export default function GamePage() {
 
   if (status === "idle") {
     return (
-      <main className="mx-auto max-w-4xl px-6 py-16">
+      <main className="mx-auto max-w-5xl px-6 py-16">
         <h1 className="text-3xl font-bold">No active game</h1>
 
         <p className="mt-4">
@@ -73,7 +65,7 @@ export default function GamePage() {
 
         <button
           type="button"
-          onClick={() => router.push("/")}
+          onClick={goHome}
           className="mt-6 border px-6 py-3"
         >
           Back to home
@@ -83,104 +75,80 @@ export default function GamePage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
-      <h1 className="text-3xl font-bold">
-        Mahjong Higher or Lower
-      </h1>
+    <main className="mx-auto max-w-5xl px-6 py-10">
+      <GameStats
+        score={score}
+        round={round}
+        exhaustionCount={exhaustionCount}
+        drawPileCount={drawPileCount}
+        discardPileCount={discardPileCount}
+        onExit={goHome}
+      />
 
-      <section className="mt-8 grid gap-3 sm:grid-cols-3">
-        <p>Score: {score}</p>
-        <p>Round: {round}</p>
-        <p>Status: {status}</p>
-        <p>Draw pile: {drawPileCount}</p>
-        <p>Discard pile: {discardPileCount}</p>
-        <p>Exhaustions: {exhaustionCount}/3</p>
-      </section>
+      <div className="mt-10 grid gap-10 lg:grid-cols-[1.6fr_1fr]">
+        <div>
+          <HandDisplay
+            hand={currentHand}
+            handValue={currentHandValue}
+            lastTileValueChanges={lastRound?.resolution.tileValueChanges}
+          />
 
-      <section className="mt-10">
-        <h2 className="text-2xl font-semibold">Current hand</h2>
+          {status === "game-over" ? (
+            <section className="mt-8">
+              <h2 className="text-2xl font-semibold">Game over</h2>
 
-        <ul className="mt-4 grid gap-3 sm:grid-cols-4">
-          {currentHand.map((tile) => (
-            <li key={tile.id} className="border p-4">
-              <p>{getTileLabel(tile)}</p>
-              <p>Value: {tile.value}</p>
-            </li>
-          ))}
-        </ul>
+              <ul className="mt-3">
+                {gameOverReasons.map((reason, index) => (
+                  <li key={`${reason.type}-${index}`}>
+                    {reason.type}
+                  </li>
+                ))}
+              </ul>
 
-        <p className="mt-4 text-xl">
-          Hand value: {currentHandValue ?? "—"}
-        </p>
-      </section>
+              <button
+                type="button"
+                onClick={startGame}
+                className="mt-6 border px-6 py-3"
+              >
+                Start another game
+              </button>
+            </section>
+          ) : (
+            <>
+              <p className="mt-8 text-lg italic text-[color:var(--color-muted)]">
+                Will the next hand be higher or lower than{" "}
+                {currentHandValue ?? "—"}?
+              </p>
 
-      {lastRound && (
-        <section className="mt-8 border p-4">
-          <h2 className="font-semibold">Last round</h2>
-          <p>
-            Prediction: {lastRound.resolution.prediction.direction}
-          </p>
-          <p>
-            Result: {lastRound.resolution.prediction.outcome}
-          </p>
-          <p>
-            Revealed value: {lastRound.resolution.revealedHandValue}
-          </p>
-          <p>
-            Settled value: {lastRound.resolution.settledHandValue}
-          </p>
-        </section>
-      )}
+              <section className="mt-4 flex gap-4">
+                <button
+                  type="button"
+                  disabled={!canPredict}
+                  onClick={() => makePrediction("higher")}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-6 py-3 font-semibold text-white transition hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <span aria-hidden>▲</span>
+                  Bet higher
+                </button>
 
-      {status === "game-over" ? (
-        <section className="mt-8">
-          <h2 className="text-2xl font-semibold">Game over</h2>
+                <button
+                  type="button"
+                  disabled={!canPredict}
+                  onClick={() => makePrediction("lower")}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-900 px-6 py-3 font-semibold text-white transition hover:bg-red-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <span aria-hidden>▼</span>
+                  Bet lower
+                </button>
+              </section>
+            </>
+          )}
+        </div>
 
-          <ul className="mt-3">
-            {gameOverReasons.map((reason, index) => (
-              <li key={`${reason.type}-${index}`}>
-                {reason.type}
-              </li>
-            ))}
-          </ul>
-
-          <button
-            type="button"
-            onClick={startGame}
-            className="mt-6 border px-6 py-3"
-          >
-            Start another game
-          </button>
-        </section>
-      ) : (
-        <section className="mt-8 flex gap-4">
-          <button
-            type="button"
-            disabled={!canPredict}
-            onClick={() => makePrediction("higher")}
-            className="border px-6 py-3 disabled:opacity-50"
-          >
-            Predict higher
-          </button>
-
-          <button
-            type="button"
-            disabled={!canPredict}
-            onClick={() => makePrediction("lower")}
-            className="border px-6 py-3 disabled:opacity-50"
-          >
-            Predict lower
-          </button>
-        </section>
-      )}
-
-      <button
-        type="button"
-        onClick={() => router.push("/")}
-        className="mt-8 underline"
-      >
-        Exit to home
-      </button>
+        <div>
+          <HistoryPanel history={history} />
+        </div>
+      </div>
     </main>
   );
 }

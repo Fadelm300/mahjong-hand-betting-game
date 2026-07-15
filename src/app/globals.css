@@ -1,13 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --color-background: #07130f;
-  --color-surface: #10241b;
-  --color-surface-muted: #173126;
-  --color-foreground: #f7f2e3;
-  --color-muted: #a9b8af;
-  --color-accent: #d7aa4f;
-  --color-accent-strong: #f0ca72;
+  --color-background: #0d1110;
+  --color-background-soft: #141a17;
+  --color-surface: #171e1b;
+  --color-surface-muted: #202925;
+  --color-line: #34423c;
+  --color-foreground: #f4efe2;
+  --color-muted: #9aa9a2;
+  --color-accent: #c7a85b;
+  --color-accent-strong: #e2c675;
+  --color-jade: #78b89f;
+
+  --color-tile: #f5f0df;
+  --color-tile-shade: #d8cba7;
+  --color-tile-edge: #b5a77d;
+  --color-tile-ink: #211d16;
+  --color-tile-muted: #756b55;
+
+  --color-win: #6fc99f;
+  --color-loss: #e07a73;
 }
 
 * {
@@ -17,16 +29,23 @@
 html {
   min-height: 100%;
   background: var(--color-background);
+  color-scheme: dark;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top, rgb(26 70 52 / 45%), transparent 42rem),
+    radial-gradient(circle at 14% -10%, rgb(84 129 108 / 18%), transparent 34rem),
+    radial-gradient(circle at 92% 0%, rgb(199 168 91 / 10%), transparent 28rem),
+    linear-gradient(rgb(255 255 255 / 1.5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 1.5%) 1px, transparent 1px),
     var(--color-background);
+  background-size: auto, auto, 42px 42px, 42px 42px, auto;
+  background-attachment: fixed;
   color: var(--color-foreground);
   font-family: var(--font-geist), Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -39,7 +58,33 @@ a {
   text-decoration: none;
 }
 
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 4px;
+}
+
 ::selection {
   background: var(--color-accent);
   color: var(--color-background);
+}
+
+* {
+  scrollbar-color: var(--color-line) transparent;
+  scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
