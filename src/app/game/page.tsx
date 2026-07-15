@@ -1,7 +1,10 @@
 "use client";
 
-import type { Tile } from "@/features/game/types/game";
+import { useRouter } from "next/navigation";
+
+import { useGameHydration } from "@/features/game/hooks/use-game-hydration";
 import { useGameStore } from "@/features/game/store/game-store";
+import type { Tile } from "@/features/game/types/game";
 
 function getTileLabel(tile: Tile): string {
   if (tile.category === "number") {
@@ -16,6 +19,9 @@ function getTileLabel(tile: Tile): string {
 }
 
 export default function GamePage() {
+  const router = useRouter();
+  const hasHydrated = useGameHydration();
+
   const status = useGameStore((state) => state.status);
   const score = useGameStore((state) => state.score);
   const round = useGameStore((state) => state.round);
@@ -44,28 +50,33 @@ export default function GamePage() {
   const makePrediction = useGameStore(
     (state) => state.makePrediction,
   );
-  const resetGame = useGameStore((state) => state.resetGame);
 
   const lastRound = history[history.length - 1];
   const canPredict = status === "awaiting-prediction";
 
+  if (!hasHydrated) {
+    return (
+      <main className="mx-auto max-w-4xl px-6 py-16">
+        <p>Loading saved game...</p>
+      </main>
+    );
+  }
+
   if (status === "idle") {
     return (
       <main className="mx-auto max-w-4xl px-6 py-16">
-        <h1 className="text-4xl font-bold">
-          Mahjong Higher or Lower
-        </h1>
+        <h1 className="text-3xl font-bold">No active game</h1>
 
         <p className="mt-4">
-          Predict whether the next hand value will be higher or lower.
+          Return to the home page to start a new game.
         </p>
 
         <button
           type="button"
-          onClick={startGame}
-          className="mt-8 border px-6 py-3"
+          onClick={() => router.push("/")}
+          className="mt-6 border px-6 py-3"
         >
-          Start new game
+          Back to home
         </button>
       </main>
     );
@@ -165,10 +176,10 @@ export default function GamePage() {
 
       <button
         type="button"
-        onClick={resetGame}
+        onClick={() => router.push("/")}
         className="mt-8 underline"
       >
-        Reset
+        Exit to home
       </button>
     </main>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { PredictionDirection } from "../engine/resolve-prediction";
 import type { GameState } from "../state/game-state";
@@ -8,6 +9,8 @@ import { playRound } from "../state/play-round";
 import { startNewGame } from "../state/start-new-game";
 
 interface GameActions {
+  readonly hasHydrated: boolean;
+  readonly setHasHydrated: (value: boolean) => void;
   readonly startGame: () => void;
   readonly makePrediction: (direction: PredictionDirection) => void;
   readonly resetGame: () => void;
@@ -19,36 +22,45 @@ const initialGameState: GameState = {
   status: "idle",
   score: 0,
   round: 0,
-
   currentHand: [],
   currentHandValue: null,
-
   drawPile: [],
   discardPile: [],
-
   exhaustionCount: 0,
   nextDeckSequence: 1,
-
   history: [],
   gameOverReasons: [],
 };
 
-export const useGameStore = create<GameStore>((set) => ({
-  ...initialGameState,
+export const useGameStore = create<GameStore>()(
+  persist(
+    (set) => ({
+      ...initialGameState,
+      hasHydrated: false,
 
-  startGame: () => {
-    set(startNewGame());
-  },
+      setHasHydrated: (value) => {
+        set({ hasHydrated: value });
+      },
 
-  makePrediction: (direction) => {
-    set((state) => playRound(state, direction));
-  },
+      startGame: () => {
+        set(startNewGame());
+      },
 
-  resetGame: () => {
-    set(initialGameState);
-  },
-}));
+      makePrediction: (direction) => {
+        set((state) => playRound(state, direction));
+      },
 
+      resetGame: () => {
+        set(initialGameState);
+      },
+    }),
+    {
+      name: "mahjong-active-session",
+      storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
+    },
+  ),
+);
 
 
 // اللوجك:
