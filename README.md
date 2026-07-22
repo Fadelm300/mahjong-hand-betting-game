@@ -5,7 +5,9 @@ A technical assessment project built with Next.js, React, TypeScript, Zustand, T
 The project demonstrates domain modelling, deterministic pure functions, immutable state transitions, persistent client state, reusable UI components, automated tests, and continuous integration.
 
 
+## Live demo
 
+[Open the live application](https://fadelm300.github.io/mahjong-hand-betting-game/)
 ## Table of contents
 
 - [Repository snapshot](#repository-snapshot)
