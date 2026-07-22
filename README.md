@@ -34,7 +34,10 @@ The project demonstrates domain modelling, deterministic pure functions, immutab
 - [AI usage disclosure](#ai-usage-disclosure)
 
 ## Repository snapshot
-
+![snapshot 1](./src/assets/1.jpg)  
+![snapshot 2](./src/assets/2.jpg)  
+![snapshot 3](./src/assets/3.jpg) 
+![snapshot 3](./src/assets/4.jpg)   
 - Repository: [Fadelm300/mahjong-hand-betting-game](https://github.com/Fadelm300/mahjong-hand-betting-game)
 - Default branch: `main`
 - Package version: `0.1.0`
